@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from datetime import datetime
+
 
 app = Flask(__name__)
 CORS(app)
@@ -33,6 +35,26 @@ employees = {
 @app.route('/admin/employees', methods=['GET'])
 def get_all_employees():
     return jsonify(employees), 200
+
+@app.route('/employee/<int:employee_id>/profile', methods=['GET'])
+def get_employee_profile(employee_id):
+    employee = employees.get(employee_id)
+    if employee:
+        return jsonify(employee), 200
+    else:
+        return jsonify({'message': 'Employee not found'}), 404
+
+    
+@app.route('/employee/<int:employee_id>/clock-in', methods=['POST'])
+def clock_in_employee(employee_id):
+    employee = employees.get(employee_id)
+    if employee:
+        employee['clockInStatus'] = 'Clocked In'
+        employee['attendance'].append(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Clocked In')
+        return jsonify({'message': f'{employee["name"]} clocked in successfully'}), 200
+    else:
+        return jsonify({'message': 'Employee not found'}), 404
+
 
 # Mark attendance and login using QR code
 @app.route('/clock-in/<int:employee_id>', methods=['POST'])
@@ -112,4 +134,4 @@ def update_profile(employee_id):
         return jsonify({'message': 'Employee not found'}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True, port=9999)
+    app.run(debug=True,PORT=9998)
